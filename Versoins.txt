@@ -1,0 +1,7 @@
+20.05.01
+	starts making table, some old code still there
+	.02
+	working app
+	added separate make table and fill
+	.03
+	added table column adjuster
