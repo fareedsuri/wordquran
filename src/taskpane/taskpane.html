@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Word Quran Memorization</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+      }
+
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-size: 24px;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 14px;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #34495e;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+      }
+
+      select:focus {
+        outline: none;
+        border-color: #3498db;
+      }
+
+      .button-group {
+        margin-top: 30px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-bottom: 10px;
+      }
+
+      button:hover {
+        background-color: #229954;
+      }
+
+      button:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+      }
+
+      .status {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        display: none;
+      }
+
+      .status.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .status.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .status.info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+
+      .table-options {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #ecf0f1;
+        border-radius: 4px;
+      }
+
+      .table-options h3 {
+        margin-top: 0;
+        font-size: 16px;
+        color: #2c3e50;
+      }
+
+      .option-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .option-row label {
+        margin: 0;
+        margin-left: 8px;
+        font-weight: normal;
+      }
+
+      input[type="checkbox"] {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>🕌 Word Quran</h1>
+      <p class="subtitle">Create memorization tables for Quran Juz</p>
+
+      <div class="form-group">
+        <label for="juz-select">Select Juz:</label>
+        <select id="juz-select">
+          <option value="">-- Select a Juz --</option>
+        </select>
+      </div>
+
+      <div class="table-options">
+        <h3>Table Options</h3>
+        <div class="option-row">
+          <input type="checkbox" id="include-page-numbers" checked>
+          <label for="include-page-numbers">Include page numbers column</label>
+        </div>
+        <div class="option-row">
+          <input type="checkbox" id="include-date-column" checked>
+          <label for="include-date-column">Include date column</label>
+        </div>
+        <div class="option-row">
+          <input type="checkbox" id="include-notes-column">
+          <label for="include-notes-column">Include notes column</label>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button id="create-table-btn" disabled>Create Memorization Table</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
+  </body>
+</html>
