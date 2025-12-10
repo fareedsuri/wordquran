@@ -30,21 +30,39 @@ namespace Quran
 			string bismillah = Q.Elements("chapter").ElementAt(0).
 				Elements("verse").ElementAt(0).Attribute("text").Value;
 			XElement chp = Q.Elements("chapter").ElementAt(surahNumber);
+			
+			// Adjust margins to accommodate the verse number column
 			document.PageSetup.BottomMargin = 20; // 72 points = 1 inch
 			document.PageSetup.TopMargin = 20; // 72 points = 1 inch
-			document.PageSetup.LeftMargin = 20; // 72 points = 1 inch
+			document.PageSetup.LeftMargin = 7; // Reduced from 20 to 7 points (0.13" less)
 			document.PageSetup.RightMargin = 20; // 72 points = 1 inch
 			document.PageSetup.PageWidth = 72 * 4;
 			document.PageSetup.PageHeight = 72 * 6;
 			
 			//Set the range to the top of the document.
 			Word.Range tableLocation = document.Range(0, 0);
-			document.Tables.Add(tableLocation, chp.Elements("verse").Count() + 1, 3); // rows, columns
+			// Now 4 columns: verse number + 3 text columns
+			document.Tables.Add(tableLocation, chp.Elements("verse").Count() + 1, 4);
 
 			Word.Table newTable = document.Tables[1];
-			document.Tables[1].Columns[1].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
-			document.Tables[1].Columns[3].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
-			document.Tables[1].Columns[2].SetWidth(Convert.ToSingle( 2 * 72), Word.WdRulerStyle.wdAdjustNone);
+			
+			// Set table cell padding to 0
+			newTable.LeftPadding = 0;
+			newTable.RightPadding = 0;
+			newTable.TopPadding = 0;
+			newTable.BottomPadding = 0;
+			
+			// Column 1: Verse number (0.13 inches = ~9.36 points)
+			newTable.Columns[1].SetWidth(Convert.ToSingle(0.13 * 72), Word.WdRulerStyle.wdAdjustNone);
+			
+			// Column 2: Left text (was column 1)
+			newTable.Columns[2].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
+			
+			// Column 3: Middle text (was column 2)
+			newTable.Columns[3].SetWidth(Convert.ToSingle(2 * 72), Word.WdRulerStyle.wdAdjustNone);
+			
+			// Column 4: Right text (was column 3)
+			newTable.Columns[4].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
 			// Apply PDMS Saleem QuranFont to entire table
 			newTable.Range.Font.Name = QURAN_FONT_NAME;
@@ -85,8 +103,11 @@ namespace Quran
 			XElement chp = Q.Elements("chapter").ElementAt(surahNumber);
 
 			Word.Table newTable = document.Tables[1];
-			newTable.Cell(1, 2).Range.Text = bismillah;
-			newTable.Cell(1, 2).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+			
+			// Set bismillah in the middle column (now column 3)
+			newTable.Cell(1, 3).Range.Text = bismillah;
+			newTable.Cell(1, 3).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+			
 			int verseCounter = 2;
 			string aya;
 			int verseNumber = 1; // Track the verse number
@@ -122,57 +143,73 @@ namespace Quran
 				newTable.Cell(verseCounter, columnNumber).Range.Font.Name = detectedFontName;
 			}
 
+			void setVerseNumberCell(int verseNum)
+			{
+				// Column 1: Verse number
+				newTable.Cell(verseCounter, 1).Range.Text = verseNum.ToString();
+				newTable.Cell(verseCounter, 1).Range.Font.Size = 6;
+				newTable.Cell(verseCounter, 1).Range.Font.Name = detectedFontName;
+				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+				// Remove paragraph spacing
+				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.SpaceAfter = 0;
+				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.SpaceBefore = 0;
+			}
+
 			foreach (XElement verse in chp.Elements("verse"))
 			{
 				int tokensCount = verse.Elements("tokens").First().Elements("token").Count();
 				IEnumerable<XElement> token = verse.Elements("tokens").First().Elements("token");
 				
+				// Set verse number in column 1
+				setVerseNumberCell(verseNumber);
+				
 				switch (tokensCount)
 				{
 					case 1:
-						newTable.Cell(verseCounter, 3).Range.Text = verse.Attribute("text").Value;
-						newTable.Cell(verseCounter, 3).Range.Font.Size = 9;
-						newTable.Cell(verseCounter, 3).Range.Font.Name = detectedFontName;
+						// Column 4: Right text (full verse)
+						newTable.Cell(verseCounter, 4).Range.Text = verse.Attribute("text").Value;
+						newTable.Cell(verseCounter, 4).Range.Font.Size = 9;
+						newTable.Cell(verseCounter, 4).Range.Font.Name = detectedFontName;
 						break;
 					case 2:
-						// first column -- right 
+						// Column 4: Right text
 						aya = buildText(token, 0, 0);
-						enterTextInCell(aya, 3, 9);
+						enterTextInCell(aya, 4, 9);
 
-						// third column -- left
+						// Column 2: Left text
 						aya = buildText(token, 1, 1);
-						enterTextInCell(aya, 1, 9);
+						enterTextInCell(aya, 2, 9);
 						break;
 					case 3:
-						// first column -- right 
-						aya = buildText(token, 0,1);
-						enterTextInCell(aya, 3, 9);
+						// Column 4: Right text
+						aya = buildText(token, 0, 1);
+						enterTextInCell(aya, 4, 9);
 
-						// third column -- left
+						// Column 2: Left text
 						aya = buildText(token, 2, 2);
-						enterTextInCell(aya, 1, 9);
+						enterTextInCell(aya, 2, 9);
 						break;
 					case 4:
-						// first column -- right 
+						// Column 4: Right text
 						aya = buildText(token, 0, 1);
-						enterTextInCell(aya, 3, 9);
+						enterTextInCell(aya, 4, 9);
 
-						// third column -- left
+						// Column 2: Left text
 						aya = buildText(token, 2, 3);
-						enterTextInCell(aya, 1, 9);
+						enterTextInCell(aya, 2, 9);
 						break;
 					default:
-						// first column -- right 
+						// Column 4: Right text
 						aya = buildText(token, 0, 1);
-						enterTextInCell(aya, 3, 9);
+						enterTextInCell(aya, 4, 9);
 
-						// second column -- middle
+						// Column 3: Middle text
 						aya = buildText(token, 2, tokensCount - 3);
-						enterTextInCell(aya, 2, 5);
+						enterTextInCell(aya, 3, 5);
 
-						// third column -- left
+						// Column 2: Left text
 						aya = buildText(token, tokensCount - 2, tokensCount - 1);
-						enterTextInCell(aya, 1, 9);
+						enterTextInCell(aya, 2, 9);
 						break;
 				}
 				verseCounter += 1;
