@@ -15,6 +15,9 @@ namespace Quran
 	public partial class QuranUserControl : UserControl
 	{
 		private XElement Q;
+		// PDMS Saleem QuranFont Regular
+		private const string QURAN_FONT_NAME = "_PDMS_Saleem_QuranFont";
+		
 		public QuranUserControl()
 		{
 			InitializeComponent();
@@ -42,7 +45,36 @@ namespace Quran
 			document.Tables[1].Columns[1].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
 			document.Tables[1].Columns[3].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
 			document.Tables[1].Columns[2].SetWidth(Convert.ToSingle( 2 * 72), Word.WdRulerStyle.wdAdjustNone);
+			
+			// Apply PDMS Saleem QuranFont to entire table
+			newTable.Range.Font.Name = QURAN_FONT_NAME;
 		}
+
+		private string DetectQuranFontName(Word.Document document)
+		{
+			// Try different possible font names
+			string[] possibleNames = {
+				"_PDMS_Saleem_QuranFont",
+				"PDMS_Saleem_QuranFont",
+				"PDMS Saleem QuranFont",
+				"_PDMS_Saleem_QuranFont Regular"
+			};
+
+			Word.Range testRange = document.Range(0, 0);
+			
+			foreach (string fontName in possibleNames)
+			{
+				testRange.Font.Name = fontName;
+				if (testRange.Font.Name == fontName)
+				{
+					System.Diagnostics.Debug.WriteLine($"Found font: {fontName}");
+					return fontName;
+				}
+			}
+			
+			return null; // Font not found
+		}
+
 		private void button_RunCode_Click_1(object sender, EventArgs e)
 		{
 			Word._Application application = Globals.ThisAddIn.Application;
@@ -57,16 +89,50 @@ namespace Quran
 			newTable.Cell(1, 2).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
 			int verseCounter = 2;
 			string aya;
+			int verseNumber = 1; // Track the verse number
+
+			// Test font availability and detect correct font name
+			string detectedFontName = DetectQuranFontName(document);
+			if (detectedFontName == null)
+			{
+				MessageBox.Show($"Warning: PDMS Saleem QuranFont not found!\n\nPlease verify:\n" +
+					$"1. Font file '_PDMS_Saleem_QuranFont Regular.ttf' is installed\n" +
+					$"2. Word has been restarted after installation\n" +
+					$"3. Font appears in Word's font list\n\n" +
+					$"Check Windows Settings → Fonts to confirm installation.",
+					"Font Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return; // Exit early
+			}
+
+			// Local functions defined after detectedFontName
+			string buildText(IEnumerable<XElement> token, int from, int to)
+			{
+				string ayaText = "";
+				for (int cellNumber = from; cellNumber <= to; cellNumber++)
+				{
+					ayaText += token.ElementAt(cellNumber).Attribute("text").Value + " ";
+				}
+				return ayaText;
+			}
+
+			void enterTextInCell(string text, int columnNumber, int fontSize) 
+			{
+				newTable.Cell(verseCounter, columnNumber).Range.Text = text;
+				newTable.Cell(verseCounter, columnNumber).Range.Font.Size = fontSize;
+				newTable.Cell(verseCounter, columnNumber).Range.Font.Name = detectedFontName;
+			}
 
 			foreach (XElement verse in chp.Elements("verse"))
 			{
 				int tokensCount = verse.Elements("tokens").First().Elements("token").Count();
 				IEnumerable<XElement> token = verse.Elements("tokens").First().Elements("token");
+				
 				switch (tokensCount)
 				{
 					case 1:
 						newTable.Cell(verseCounter, 3).Range.Text = verse.Attribute("text").Value;
 						newTable.Cell(verseCounter, 3).Range.Font.Size = 9;
+						newTable.Cell(verseCounter, 3).Range.Font.Name = detectedFontName;
 						break;
 					case 2:
 						// first column -- right 
@@ -110,24 +176,8 @@ namespace Quran
 						break;
 				}
 				verseCounter += 1;
+				verseNumber += 1;
 			}
-
-			string buildText(IEnumerable<XElement> token, int from, int to)
-			{
-				string ayaText = "";
-				for (int cellNumber = from; cellNumber <= to; cellNumber++)
-				{
-					ayaText += token.ElementAt(cellNumber).Attribute("text").Value + " ";
-				}
-				return ayaText;
-			}
-
-			void enterTextInCell(string text, int columnNumber, int fontSize) 
-			{
-				newTable.Cell(verseCounter, columnNumber).Range.Text = text;
-				newTable.Cell(verseCounter, columnNumber).Range.Font.Size = fontSize;
-			}
-
 		}
 
 		private void QuranUserControl_Load(object sender, EventArgs e)
