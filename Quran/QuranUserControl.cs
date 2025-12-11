@@ -31,11 +31,11 @@ namespace Quran
 				Elements("verse").ElementAt(0).Attribute("text").Value;
 			XElement chp = Q.Elements("chapter").ElementAt(surahNumber);
 			
-			// Adjust margins to accommodate the verse number column
+			// Adjust margins
 			document.PageSetup.BottomMargin = 20; // 72 points = 1 inch
 			document.PageSetup.TopMargin = 20; // 72 points = 1 inch
-			document.PageSetup.LeftMargin = 7; // Reduced from 20 to 7 points
-			document.PageSetup.RightMargin = 20; // 72 points = 1 inch
+			document.PageSetup.LeftMargin = Convert.ToSingle(0.18 * 72); // 0.18 inches
+			document.PageSetup.RightMargin = Convert.ToSingle(0.2 * 72); // 0.2 inches
 			document.PageSetup.PageWidth = 72 * 4;
 			document.PageSetup.PageHeight = 72 * 6;
 			
@@ -52,16 +52,19 @@ namespace Quran
 			newTable.TopPadding = 0;
 			newTable.BottomPadding = 0;
 			
+			// Remove row height restrictions - allow rows to auto-fit content
+			newTable.Rows.HeightRule = Word.WdRowHeightRule.wdRowHeightAuto;
+			
 			// Column 1: Verse number (0.2 inches = 14.4 points, minimum safe width)
 			newTable.Columns[1].SetWidth(Convert.ToSingle(0.2 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
-			// Column 2: Left text (0.72 inches to compensate)
+			// Column 2: Left text (0.72 inches)
 			newTable.Columns[2].SetWidth(Convert.ToSingle(0.72 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
 			// Column 3: Middle text (2.0 inches)
 			newTable.Columns[3].SetWidth(Convert.ToSingle(2 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
-			// Column 4: Right text (0.68 inches to fit)
+			// Column 4: Right text (0.68 inches)
 			newTable.Columns[4].SetWidth(Convert.ToSingle(0.68 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
 			// Apply PDMS Saleem QuranFont to entire table
@@ -116,7 +119,7 @@ namespace Quran
 			string detectedFontName = DetectQuranFontName(document);
 			if (detectedFontName == null)
 			{
-				MessageBox.Show($"Warning: PDMS Saleem QuranFont not found!\n\nPlease verify:\n" +
+				MessageBox.Show($"Warning: PDMS_Saleem_QuranFont not found!\n\nPlease verify:\n" +
 					$"1. Font file '_PDMS_Saleem_QuranFont Regular.ttf' is installed\n" +
 					$"2. Word has been restarted after installation\n" +
 					$"3. Font appears in Word's font list\n\n" +
@@ -141,6 +144,13 @@ namespace Quran
 				newTable.Cell(verseCounter, columnNumber).Range.Text = text;
 				newTable.Cell(verseCounter, columnNumber).Range.Font.Size = fontSize;
 				newTable.Cell(verseCounter, columnNumber).Range.Font.Name = detectedFontName;
+				
+				// Set paragraph spacing to 0
+				newTable.Cell(verseCounter, columnNumber).Range.ParagraphFormat.SpaceAfter = 0;
+				newTable.Cell(verseCounter, columnNumber).Range.ParagraphFormat.SpaceBefore = 0;
+				
+				// Set line spacing to single (1.0)
+				newTable.Cell(verseCounter, columnNumber).Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
 				
 				// Set alignment based on column
 				if (columnNumber == 2)
@@ -201,6 +211,10 @@ namespace Quran
 						newTable.Cell(verseCounter, 4).Range.Font.Size = 9;
 						newTable.Cell(verseCounter, 4).Range.Font.Name = detectedFontName;
 						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
+						// Set paragraph and line spacing
+						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.SpaceAfter = 0;
+						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.SpaceBefore = 0;
+						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
 						break;
 					case 2:
 						// Column 4: Right text
