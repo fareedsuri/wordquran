@@ -176,7 +176,10 @@ namespace Quran
 				newTable.Cell(verseCounter, 1).Range.Text = verseNum.ToString();
 				newTable.Cell(verseCounter, 1).Range.Font.Size = 6;
 				newTable.Cell(verseCounter, 1).Range.Font.Name = detectedFontName;
+				newTable.Cell(verseCounter, 1).Range.Font.Bold = 1; // Make bold
+				newTable.Cell(verseCounter, 1).Range.Font.Color = (Word.WdColor)0x808000; // Dark teal (RGB: 0, 128, 128)
 				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+				newTable.Cell(verseCounter, 1).VerticalAlignment = Word.WdCellVerticalAlignment.wdCellAlignVerticalCenter; // Vertical center
 				// Remove paragraph spacing
 				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.SpaceAfter = 0;
 				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.SpaceBefore = 0;
@@ -191,6 +194,33 @@ namespace Quran
 					for (int col = 1; col <= 4; col++)
 					{
 						newTable.Cell(verseCounter, col).Shading.BackgroundPatternColor = Word.WdColor.wdColorGray15;
+					}
+				}
+			}
+
+			void setRowSpacing()
+			{
+				// Set paragraph and line spacing for ALL cells in the row
+				for (int col = 1; col <= 4; col++)
+				{
+					newTable.Cell(verseCounter, col).Range.ParagraphFormat.SpaceAfter = 0;
+					newTable.Cell(verseCounter, col).Range.ParagraphFormat.SpaceBefore = 0;
+					newTable.Cell(verseCounter, col).Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
+					
+					// Set font size based on column (prevents empty cells from having size 12)
+					if (col == 1)
+					{
+						// Column 1 already set by setVerseNumberCell (size 6)
+					}
+					else if (col == 3)
+					{
+						// Column 3: Middle text - smaller font
+						newTable.Cell(verseCounter, col).Range.Font.Size = 5;
+					}
+					else
+					{
+						// Columns 2 & 4: Standard text font
+						newTable.Cell(verseCounter, col).Range.Font.Size = 9;
 					}
 				}
 			}
@@ -211,10 +241,6 @@ namespace Quran
 						newTable.Cell(verseCounter, 4).Range.Font.Size = 9;
 						newTable.Cell(verseCounter, 4).Range.Font.Name = detectedFontName;
 						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
-						// Set paragraph and line spacing
-						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.SpaceAfter = 0;
-						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.SpaceBefore = 0;
-						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
 						break;
 					case 2:
 						// Column 4: Right text
@@ -257,6 +283,9 @@ namespace Quran
 						enterTextInCell(aya, 2, 9);
 						break;
 				}
+				
+				// Apply row spacing to all cells (including empty ones)
+				setRowSpacing();
 				
 				// Apply alternating row shading
 				applyAlternateRowShading();

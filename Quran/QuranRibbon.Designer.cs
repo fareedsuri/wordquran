@@ -36,7 +36,8 @@
         {
             this.tab1 = this.Factory.CreateRibbonTab();
             this.Quran = this.Factory.CreateRibbonGroup();
-            this.button_OpenQuranTaskPane = this.Factory.CreateRibbonButton();
+            this.dropdown_SurahSelector = this.Factory.CreateRibbonDropDown();
+            this.button_BuildQuranTable = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.Quran.SuspendLayout();
             this.SuspendLayout();
@@ -50,15 +51,24 @@
             // 
             // Quran
             // 
-            this.Quran.Items.Add(this.button_OpenQuranTaskPane);
-            this.Quran.Label = "Quran App";
+            this.Quran.Items.Add(this.dropdown_SurahSelector);
+            this.Quran.Items.Add(this.button_BuildQuranTable);
+            this.Quran.Label = "Quran";
             this.Quran.Name = "Quran";
             // 
-            // button_OpenQuranTaskPane
+            // dropdown_SurahSelector
             // 
-            this.button_OpenQuranTaskPane.Label = "Start Quran App";
-            this.button_OpenQuranTaskPane.Name = "button_OpenQuranTaskPane";
-            this.button_OpenQuranTaskPane.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button_OpenQuranTaskPane_Click);
+            this.dropdown_SurahSelector.Label = "Select Surah:";
+            this.dropdown_SurahSelector.Name = "dropdown_SurahSelector";
+            this.dropdown_SurahSelector.SizeString = "000";
+            // 
+            // button_BuildQuranTable
+            // 
+            this.button_BuildQuranTable.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.button_BuildQuranTable.Label = "Build Quran Table";
+            this.button_BuildQuranTable.Name = "button_BuildQuranTable";
+            this.button_BuildQuranTable.ShowImage = true;
+            this.button_BuildQuranTable.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button_BuildQuranTable_Click);
             // 
             // QuranRibbon
             // 
@@ -78,7 +88,8 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup Quran;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button_OpenQuranTaskPane;
+        internal Microsoft.Office.Tools.Ribbon.RibbonDropDown dropdown_SurahSelector;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button_BuildQuranTable;
     }
 
     partial class ThisRibbonCollection
