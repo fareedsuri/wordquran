@@ -34,7 +34,7 @@ namespace Quran
 			// Adjust margins to accommodate the verse number column
 			document.PageSetup.BottomMargin = 20; // 72 points = 1 inch
 			document.PageSetup.TopMargin = 20; // 72 points = 1 inch
-			document.PageSetup.LeftMargin = 7; // Reduced from 20 to 7 points (0.13" less)
+			document.PageSetup.LeftMargin = 7; // Reduced from 20 to 7 points
 			document.PageSetup.RightMargin = 20; // 72 points = 1 inch
 			document.PageSetup.PageWidth = 72 * 4;
 			document.PageSetup.PageHeight = 72 * 6;
@@ -46,23 +46,23 @@ namespace Quran
 
 			Word.Table newTable = document.Tables[1];
 			
-			// Set table cell padding to 0
-			newTable.LeftPadding = 0;
-			newTable.RightPadding = 0;
+			// Set table cell padding to minimal
+			newTable.LeftPadding = 1;
+			newTable.RightPadding = 1;
 			newTable.TopPadding = 0;
 			newTable.BottomPadding = 0;
 			
-			// Column 1: Verse number (0.13 inches = ~9.36 points)
-			newTable.Columns[1].SetWidth(Convert.ToSingle(0.13 * 72), Word.WdRulerStyle.wdAdjustNone);
+			// Column 1: Verse number (0.2 inches = 14.4 points, minimum safe width)
+			newTable.Columns[1].SetWidth(Convert.ToSingle(0.2 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
-			// Column 2: Left text (was column 1)
-			newTable.Columns[2].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
+			// Column 2: Left text (0.72 inches to compensate)
+			newTable.Columns[2].SetWidth(Convert.ToSingle(0.72 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
-			// Column 3: Middle text (was column 2)
+			// Column 3: Middle text (2.0 inches)
 			newTable.Columns[3].SetWidth(Convert.ToSingle(2 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
-			// Column 4: Right text (was column 3)
-			newTable.Columns[4].SetWidth(Convert.ToSingle(0.75 * 72), Word.WdRulerStyle.wdAdjustNone);
+			// Column 4: Right text (0.68 inches to fit)
+			newTable.Columns[4].SetWidth(Convert.ToSingle(0.68 * 72), Word.WdRulerStyle.wdAdjustNone);
 			
 			// Apply PDMS Saleem QuranFont to entire table
 			newTable.Range.Font.Name = QURAN_FONT_NAME;
@@ -141,6 +141,23 @@ namespace Quran
 				newTable.Cell(verseCounter, columnNumber).Range.Text = text;
 				newTable.Cell(verseCounter, columnNumber).Range.Font.Size = fontSize;
 				newTable.Cell(verseCounter, columnNumber).Range.Font.Name = detectedFontName;
+				
+				// Set alignment based on column
+				if (columnNumber == 2)
+				{
+					// Column 2: Left align
+					newTable.Cell(verseCounter, columnNumber).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphLeft;
+				}
+				else if (columnNumber == 3)
+				{
+					// Column 3: Center align
+					newTable.Cell(verseCounter, columnNumber).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+				}
+				else if (columnNumber == 4)
+				{
+					// Column 4: Right align
+					newTable.Cell(verseCounter, columnNumber).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
+				}
 			}
 
 			void setVerseNumberCell(int verseNum)
@@ -170,6 +187,7 @@ namespace Quran
 						newTable.Cell(verseCounter, 4).Range.Text = verse.Attribute("text").Value;
 						newTable.Cell(verseCounter, 4).Range.Font.Size = 9;
 						newTable.Cell(verseCounter, 4).Range.Font.Name = detectedFontName;
+						newTable.Cell(verseCounter, 4).Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
 						break;
 					case 2:
 						// Column 4: Right text
