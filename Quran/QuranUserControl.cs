@@ -172,6 +172,19 @@ namespace Quran
 				newTable.Cell(verseCounter, 1).Range.ParagraphFormat.SpaceBefore = 0;
 			}
 
+			void applyAlternateRowShading()
+			{
+				// Apply light grey shading to alternate rows (even row numbers)
+				if (verseCounter % 2 == 0)
+				{
+					// Light grey shading for even rows (RGB: 242, 242, 242)
+					for (int col = 1; col <= 4; col++)
+					{
+						newTable.Cell(verseCounter, col).Shading.BackgroundPatternColor = Word.WdColor.wdColorGray15;
+					}
+				}
+			}
+
 			foreach (XElement verse in chp.Elements("verse"))
 			{
 				int tokensCount = verse.Elements("tokens").First().Elements("token").Count();
@@ -230,6 +243,10 @@ namespace Quran
 						enterTextInCell(aya, 2, 9);
 						break;
 				}
+				
+				// Apply alternating row shading
+				applyAlternateRowShading();
+				
 				verseCounter += 1;
 				verseNumber += 1;
 			}

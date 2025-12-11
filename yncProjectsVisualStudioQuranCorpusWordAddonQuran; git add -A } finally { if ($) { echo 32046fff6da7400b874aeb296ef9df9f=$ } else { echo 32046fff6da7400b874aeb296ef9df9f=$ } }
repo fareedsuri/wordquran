@@ -1,0 +1,4 @@
+[33m92556f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Add column alignment: left (col 2), center (col 3), right (col 4) and fix verse number column width to 0.2 inches
+[33m81968e1[m Add verse number column (0.13 inch, font size 6) and adjust left margin
+[33mebcc7f2[m Update to use PDMS Saleem QuranFont Regular - remove circled numbers functionality
+[33m863b3fa[m Initial commit: Word Quran Add-in
